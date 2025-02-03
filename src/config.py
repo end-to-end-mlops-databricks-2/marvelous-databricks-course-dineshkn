@@ -30,4 +30,11 @@ class ProjectConfig:
         "ast_pct",
     ]
 
-    CATEGORICAL_COLUMNS = ["team_abbreviation", "college", "country", "draft_year", "draft_round", "draft_number"]
+    CATEGORICAL_COLUMNS = [
+        "team_abbreviation",
+        "college",
+        "country",
+        "draft_year",
+        "draft_round",
+        "draft_number",
+    ]
