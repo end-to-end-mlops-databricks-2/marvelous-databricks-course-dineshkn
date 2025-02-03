@@ -1,0 +1,43 @@
+import sys
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Add the project root to the Python path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
+from src.utils import get_player_career_stats
+
+
+def main():
+    # Initialize and process data
+    processor = DataProcessor()
+    df = processor.load_data().clean_data().process_numerical_features().get_processed_data()
+
+    # Example analysis section
+    print("Data Overview:")
+    print("-" * 50)
+    print(f"Total number of records: {len(df)}")
+    print(f"Unique players: {df['player_name'].nunique()}")
+    print(f"Seasons covered: {df['season'].nunique()}")
+
+    # Example player analysis
+    player_name = "LeBron James"
+    stats = get_player_career_stats(df, player_name)
+    print(f"\n{player_name}'s Career Stats:")
+    print("-" * 50)
+    for stat, value in stats.items():
+        print(f"{stat}: {value:.2f}")
+
+    # Example visualization
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(data=df, x="age", y="pts", alpha=0.5)
+    plt.title("Age vs Points per Game")
+    plt.savefig(project_root / "data" / "processed" / "age_vs_points.png")
+    plt.close()
+
+
+if __name__ == "__main__":
+    main()
