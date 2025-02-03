@@ -1,6 +1,13 @@
+import sys
+from pathlib import Path
+
 import pandas as pd
 
-from config import ProjectConfig
+# Add the project root to Python path
+project_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.config import ProjectConfig
 
 
 class DataProcessor:
@@ -35,17 +42,32 @@ class DataProcessor:
 
         return self
 
-    def process_numerical_features(self):
-        """Process numerical features."""
+    def add_derived_features(self):
+        """Add calculated features to the dataset."""
+        if self.data is None:
+            raise ValueError("Data not loaded. Call load_data() first.")
+        # Calculate BMI
+        self.data["bmi"] = self.data["player_weight"] / (self.data["player_height"] ** 2)
+
+        # Calculate points per minute (assuming games are 48 minutes)
+        self.data["points_per_minute"] = self.data["pts"] / (self.data["gp"] * 48)
+
+        # Calculate overall efficiency
+        self.data["efficiency"] = (
+            self.data["pts"]
+            + self.data["reb"]
+            + self.data["ast"]
+            - (self.data["player_weight"] - 80) * 0.1  # Small penalty for being too heavy
+        )
+
+        return self
+
+    def filter_data(self, min_games=20, min_points=5):
+        """Filter data based on minimum criteria."""
         if self.data is None:
             raise ValueError("Data not loaded. Call load_data() first.")
 
-        # Convert heights to meters and weights to kg
-        self.data["player_height"] = self.data["player_height"] / 100  # assuming height is in cm
-
-        # Scale numerical features if needed
-        # Add more numerical processing as needed
-
+        self.data = self.data[(self.data["gp"] >= min_games) & (self.data["pts"] >= min_points)]
         return self
 
     def get_processed_data(self):
