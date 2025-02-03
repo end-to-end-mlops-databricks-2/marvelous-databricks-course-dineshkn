@@ -3,11 +3,10 @@ from pathlib import Path
 
 import pandas as pd
 
-# Add the project root to Python path
-project_root = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(project_root))
-
 from src.config import ProjectConfig
+
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
 
 
 class DataProcessor:
@@ -47,7 +46,9 @@ class DataProcessor:
         if self.data is None:
             raise ValueError("Data not loaded. Call load_data() first.")
         # Calculate BMI
-        self.data["bmi"] = self.data["player_weight"] / (self.data["player_height"] ** 2)
+        self.data["bmi"] = self.data["player_weight"] / (
+            self.data["player_height"] ** 2
+        )
 
         # Calculate points per minute (assuming games are 48 minutes)
         self.data["points_per_minute"] = self.data["pts"] / (self.data["gp"] * 48)
@@ -57,7 +58,8 @@ class DataProcessor:
             self.data["pts"]
             + self.data["reb"]
             + self.data["ast"]
-            - (self.data["player_weight"] - 80) * 0.1  # Small penalty for being too heavy
+            - (self.data["player_weight"] - 80)
+            * 0.1  # Small penalty for being too heavy
         )
 
         return self
@@ -67,7 +69,9 @@ class DataProcessor:
         if self.data is None:
             raise ValueError("Data not loaded. Call load_data() first.")
 
-        self.data = self.data[(self.data["gp"] >= min_games) & (self.data["pts"] >= min_points)]
+        self.data = self.data[
+            (self.data["gp"] >= min_games) & (self.data["pts"] >= min_points)
+        ]
         return self
 
     def get_processed_data(self):

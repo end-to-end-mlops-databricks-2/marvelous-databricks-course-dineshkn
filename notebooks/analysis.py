@@ -4,19 +4,24 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
-
-# Now the imports should work
 from src.data_processor import DataProcessor
 from src.utils import get_player_career_stats
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
 
 
 def main():
     # Initialize and process data
     processor = DataProcessor()
-    df = processor.load_data().clean_data().add_derived_features().filter_data(min_games=10).get_processed_data()
+    df = (
+        processor.load_data()
+        .clean_data()
+        .add_derived_features()
+        .filter_data(min_games=10)
+        .get_processed_data()
+    )
 
     # Analysis section
     print("Data Overview:")
