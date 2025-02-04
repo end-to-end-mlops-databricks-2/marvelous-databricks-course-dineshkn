@@ -1,5 +1,5 @@
 [project]
-name = "nba_player_analysis"
+name = "nba-analysis"
 version = "0.0.1"
 description = "NBA player analysis project"
 requires-python = ">=3.11, <3.12"
@@ -33,7 +33,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where =["src"]
-include = ["house_price*"]
+include = ["nba_analysis*"]
 
 [tool.ruff]
 line-length = 88
