@@ -1,12 +1,15 @@
+import os
 import sys
 from pathlib import Path
 
 import pandas as pd
 
-from src.config import ProjectConfig
+from nba_analysis.config import ProjectConfig
 
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
+
+print(f"Looking for file at: {ProjectConfig.RAW_DATA_FILE}")
 
 
 class DataProcessor:
@@ -16,7 +19,14 @@ class DataProcessor:
 
     def load_data(self):
         """Load the raw NBA players data."""
-        self.data = pd.read_csv(self.config.RAW_DATA_FILE)
+        file_path = self.config.RAW_DATA_FILE.resolve()
+
+        print(f"Current working directory: {Path.cwd()}")
+        print(f"File path: {file_path}")
+        print(f"File exists: {file_path.exists()}")
+        print(f"Is file readable: {os.access(file_path, os.R_OK)}")
+
+        self.data = pd.read_csv(file_path)
         return self
 
     def clean_data(self):

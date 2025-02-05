@@ -4,8 +4,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from src.data_processor import DataProcessor
-from src.utils import get_player_career_stats
+from nba_analysis.data_processor import DataProcessor
+from nba_analysis.utils import get_player_career_stats
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent

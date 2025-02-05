@@ -1,2 +1,60 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-.databricks
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+.env/
+*.env
+*.venv
+
+# Logs and debug
+logs/
+*.log
+debug.log
+
+# Data files
+data/
+datasets/
+*.csv
+*.json
+*.parquet
+*.db
+*.sqlite
+
+# MLflow artifacts and experiment tracking
+mlruns/
+mlflow.db
+
+# Model artifacts
+models/
+*.h5
+*.pkl
+*.joblib
+*.onnx
+
+# Databricks-specific files
+.dbx/
+databricks/
+workspace/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Python package files
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
+
+# Temporary files
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
