@@ -1,97 +1,60 @@
-# OS X
-.DS_Store
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+.env/
+*.env
+*.venv
+
+# Logs and debug
+logs/
+*.log
+debug.log
+
+# Data files
+data/
+datasets/
+*.csv
+*.json
+*.parquet
+*.db
+*.sqlite
+
+# MLflow artifacts and experiment tracking
+mlruns/
+mlflow.db
+
+# Model artifacts
+models/
+*.h5
+*.pkl
+*.joblib
+*.onnx
+
+# Databricks-specific files
+.dbx/
+databricks/
+workspace/
+.databricks
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Python package files
+dist/
+build/
+*.egg-info/
+pip-wheel-metadata/
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+.DS_Store
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
-
-# Folders
-# data/
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# pyenv
-.python-version
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Pycharm Project Settings
-.idea/
-
-# Rope project settings
-.ropeproject
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# R project files
-**.Rproj
-*.utf8.md
-*.knit.md
-.Rproj.user
-
-# VS code configuration
-.vscode
-.history
+# Temporary files
+*.tmp
+*.swp
+Thumbs.db
