@@ -26,7 +26,6 @@ mlruns/
 mlflow.db
 
 # Model artifacts
-models/
 *.h5
 *.pkl
 *.joblib

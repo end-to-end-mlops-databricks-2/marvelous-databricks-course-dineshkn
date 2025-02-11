@@ -1,0 +1,31 @@
+input_data: str 
+local_data: str = '/Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv'
+experiment_name: "/Shared/nba-points-basic"
+parameters:
+  learning_rate: 0.01
+  n_estimators: 1000
+  max_depth: 6
+num_features:
+  - age
+  - player_height
+  - player_weight
+  - gp
+  - reb
+  - ast
+  - net_rating
+  - oreb_pct
+  - dreb_pct
+  - usg_pct
+  - ts_pct
+  - ast_pct
+cat_features:
+  - team_abbreviation
+  - college
+  - country
+  - draft_year
+  - draft_round
+  - draft_number
+target: pts
+experiment_name_basic: '/Shared/nba-points-basic'
+experiment_name_custom: '/Shared/nba-points-custom'
+experiment_name_fe: '/Shared/nba-points-fe'
