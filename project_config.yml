@@ -1,4 +1,4 @@
-input_data: str 
+input_data: str
 local_data: str = '/Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv'
 experiment_name: "/Shared/nba-points-basic"
 parameters:
@@ -29,3 +29,5 @@ target: pts
 experiment_name_basic: '/Shared/nba-points-basic'
 experiment_name_custom: '/Shared/nba-points-custom'
 experiment_name_fe: '/Shared/nba-points-fe'
+
+

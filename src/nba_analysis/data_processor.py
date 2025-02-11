@@ -121,9 +121,9 @@ class DataProcessor:
         )
 
     def enable_change_data_feed(self):
-        """Enable CDC for Delta tables."""
         for table in ["nba_train_set", "nba_test_set"]:
+            table_path = f"{self.config.catalog_name}.{self.config.schema_name}.{table}"
             self.spark.sql(
-                f"ALTER TABLE {self.config.catalog_name}.{self.config.schema_name}.{table} "
+                f"ALTER TABLE {table_path} "
                 "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
             )
