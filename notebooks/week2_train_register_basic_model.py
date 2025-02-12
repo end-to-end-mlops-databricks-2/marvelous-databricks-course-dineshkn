@@ -99,5 +99,7 @@ test_set = spark.table(
     f"{config.catalog_name}.{config.schema_name}.nba_test_set"
     ).limit(10)
 X_test = test_set.drop(config.target).toPandas()
-predictions = basic_model.model.predict(X_test[config.num_features])  # Use num_features from config
+predictions = basic_model.model.predict(
+    X_test[config.num_features]
+    )  # Use num_features from config
 print("Predictions:", predictions)
