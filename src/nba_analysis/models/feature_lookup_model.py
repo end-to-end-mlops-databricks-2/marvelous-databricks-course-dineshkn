@@ -47,8 +47,8 @@ class FeatureLookUpModel:
         """Create or replace the player_features table and populate it."""
         self.spark.sql(f"""
         CREATE OR REPLACE TABLE {self.feature_table_name}
-        (player_name STRING NOT NULL, 
-         avg_points DOUBLE, 
+        (player_name STRING NOT NULL,
+         avg_points DOUBLE,
          avg_rebounds DOUBLE, 
          avg_assists DOUBLE);
         """)
@@ -208,7 +208,6 @@ class FeatureLookUpModel:
             alias="latest-model",
             version=latest_version,
         )
-
         logger.info(f"✅ Model registered as version {latest_version}.")
 
     def load_latest_model_and_predict(self, X):

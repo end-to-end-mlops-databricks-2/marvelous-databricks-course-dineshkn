@@ -30,5 +30,3 @@ cat_features:
   - draft_number
 target: pts
 experiment_name_basic: '/Shared/nba-points-basic'
-
-
