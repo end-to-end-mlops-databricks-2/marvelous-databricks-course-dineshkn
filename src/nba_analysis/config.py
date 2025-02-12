@@ -8,9 +8,10 @@ from pydantic import BaseModel
 class ProjectConfig(BaseModel):
     # Core configuration fields without default values
     input_data: str
-    local_data: str = "data/raw/all_seasons.csv"  # Add this line
+    local_data: str = "data/raw/all_seasons.csv"  
     experiment_name: str
-    catalog_name: str    # Add this
+    experiment_name_fe: str 
+    catalog_name: str    
     schema_name: str
     target: str
     num_features: List[str]
