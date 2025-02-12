@@ -53,10 +53,12 @@ class FeatureLookUpModel:
          avg_assists DOUBLE);
         """)
         self.spark.sql(
-            f"ALTER TABLE {self.feature_table_name} ADD CONSTRAINT player_pk PRIMARY KEY(player_name);"
+            f"ALTER TABLE {self.feature_table_name} "
+            f"ADD CONSTRAINT player_pk PRIMARY KEY(player_name);"
         )
         self.spark.sql(
-            f"ALTER TABLE {self.feature_table_name} SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
+            f"ALTER TABLE {self.feature_table_name} "
+            f"SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
 
         # Populate feature table from training and test sets
@@ -210,7 +212,13 @@ class FeatureLookUpModel:
         logger.info(f"✅ Model registered as version {latest_version}.")
 
     def load_latest_model_and_predict(self, X):
-        """Load the trained model from MLflow using Feature Engineering Client and make predictions."""
-        model_uri = f"models:/{self.catalog_name}.{self.schema_name}.nba_points_model_fe@latest-model"
+        """
+        Load the trained model from MLflow using Feature Engineering Client
+        and make predictions.
+        """
+        model_uri = (
+            f"models:/{self.catalog_name}.{self.schema_name}.nba_points_model_fe"
+            f"@latest-model"
+        )
         predictions = self.fe.score_batch(model_uri=model_uri, df=X)
         return predictions
