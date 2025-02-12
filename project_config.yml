@@ -1,6 +1,8 @@
-input_data: str
-local_data: str = '/Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv'
+input_data: '/Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv'
+local_data: 'data/raw/all_seasons.csv'
 experiment_name: "/Shared/nba-points-basic"
+catalog_name: 'mlops_dev'
+schema_name: 'dineshka'
 parameters:
   learning_rate: 0.01
   n_estimators: 1000

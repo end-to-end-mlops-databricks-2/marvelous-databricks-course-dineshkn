@@ -10,6 +10,8 @@ class ProjectConfig(BaseModel):
     input_data: str
     local_data: str = "data/raw/all_seasons.csv"  # Add this line
     experiment_name: str
+    catalog_name: str    # Add this
+    schema_name: str
     target: str
     num_features: List[str]
     cat_features: List[str]

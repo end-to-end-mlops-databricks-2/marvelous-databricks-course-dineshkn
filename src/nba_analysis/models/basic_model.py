@@ -5,7 +5,13 @@ from mlflow.tracking import MlflowClient
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-
+from mlflow import MlflowClient
+from mlflow.models import infer_signature
+from pyspark.sql import SparkSession
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from lightgbm import LGBMRegressor
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 class BasicModel:
     def __init__(self, config, tags, spark=None):
@@ -20,17 +26,17 @@ class BasicModel:
     def load_data(self):
         """Load data from either Databricks or local file"""
         try:
-            if self.spark:
-                print("Attempting to load from Databricks volume...")
-                self.data = self.spark.read.csv(self.config.input_data).toPandas()
-            else:
-                raise Exception("No Spark session")
+            print("Attempting to load from Databricks volume...")
+            # Add header=True and inferSchema=True
+            self.data = self.spark.read.csv(
+                self.config.input_data,
+                header=True,
+                inferSchema=True
+                ).toPandas()
+            print(f"Successfully loaded data from Databricks volume")
         except Exception as e:
-            print(f"Falling back to local file: {e}")
-            local_path = "data/raw/all_seasons.csv"
-            print(f"Loading from: {local_path}")
-            self.data = pd.read_csv(local_path)
-
+            print(f"Error loading from Databricks: {str(e)}")
+            raise  # Re-raise the exception instead of falling back to local file
         print(f"Data loaded with shape: {self.data.shape}")
         return self
 
@@ -84,6 +90,9 @@ class BasicModel:
             raise ValueError("Model not trained. Call train() first.")
 
         with mlflow.start_run(tags=self.tags) as run:
+            # Disable MLflow's autologging to prevent duplicate runs
+            mlflow.autolog(disable=True)
+            self.run_id = run.info.run_id  # Store the run ID
             # Log parameters
             mlflow.log_params(self.config.parameters)
 
@@ -91,14 +100,18 @@ class BasicModel:
             train_score = self.model.score(self.X, self.y)
             mlflow.log_metric("train_r2", train_score)
 
-            # Log model
+            # Infer model signature
+            y_pred = self.model.predict(self.X)  # Get predictions on full dataset
+            signature = mlflow.models.infer_signature(self.X, y_pred)  # Infer input-output schema
+
+            # Log model with signature
             mlflow.sklearn.log_model(
-                self.model,
-                "nba-points-prediction-model",
+                sk_model=self.model,
+                artifact_path="nba-points-prediction-model",
+                signature=signature,  # Include the required signature
                 registered_model_name="nba_points_predictor",
             )
-
-            self.run_id = run.info.run_id
+            print(f"✅ Model logged successfully in run: {self.run_id}")
 
     def register_model(self):
         """Register model in Unity Catalog"""
