@@ -5,7 +5,6 @@ from mlflow.tracking import MlflowClient
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from mlflow import MlflowClient
 from mlflow.models import infer_signature
 from pyspark.sql import SparkSession
 from sklearn.preprocessing import OneHotEncoder
@@ -102,7 +101,9 @@ class BasicModel:
 
             # Infer model signature
             y_pred = self.model.predict(self.X)  # Get predictions on full dataset
-            signature = mlflow.models.infer_signature(self.X, y_pred)  # Infer input-output schema
+            signature = mlflow.models.infer_signature(
+                self.X, y_pred
+                )  # Infer input-output schema
 
             # Log model with signature
             mlflow.sklearn.log_model(
