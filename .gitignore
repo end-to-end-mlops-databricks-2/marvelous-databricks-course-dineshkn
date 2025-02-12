@@ -26,7 +26,6 @@ mlruns/
 mlflow.db
 
 # Model artifacts
-models/
 *.h5
 *.pkl
 *.joblib
@@ -58,3 +57,16 @@ pip-wheel-metadata/
 *.tmp
 *.swp
 Thumbs.db
+
+# Databricks and terraform
+.databricks/
+bundle/
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+bundle.tf.json
+vscode.bundlevars.json
+vscode.overrides.json
+.databricks.env

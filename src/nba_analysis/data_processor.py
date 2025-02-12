@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from pyspark.sql.functions import current_timestamp, to_utc_timestamp
+from sklearn.model_selection import train_test_split
 
 from nba_analysis.config import ProjectConfig
 
@@ -89,3 +91,39 @@ class DataProcessor:
         if self.data is None:
             raise ValueError("Data not loaded. Call load_data() first.")
         return self.data
+
+    def split_data(self, target_column="pts", test_size=0.2, random_state=42):
+        """Split data for predicting player points."""
+        if self.data is None:
+            raise ValueError("Data not loaded. Call load_data() first.")
+
+        train_set, test_set = train_test_split(
+            self.data, test_size=test_size, random_state=random_state
+        )
+        return train_set, test_set
+
+    def save_to_catalog(self, train_set: pd.DataFrame, test_set: pd.DataFrame):
+        """Save datasets to Unity Catalog."""
+        # Convert pandas to spark dataframes with timestamp
+        train_spark = self.spark.createDataFrame(train_set).withColumn(
+            "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
+        )
+        test_spark = self.spark.createDataFrame(test_set).withColumn(
+            "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
+        )
+
+        # Save to Unity Catalog
+        train_spark.write.mode("append").saveAsTable(
+            f"{self.config.catalog_name}.{self.config.schema_name}.nba_train_set"
+        )
+        test_spark.write.mode("append").saveAsTable(
+            f"{self.config.catalog_name}.{self.config.schema_name}.nba_test_set"
+        )
+
+    def enable_change_data_feed(self):
+        for table in ["nba_train_set", "nba_test_set"]:
+            table_path = f"{self.config.catalog_name}.{self.config.schema_name}.{table}"
+            self.spark.sql(
+                f"ALTER TABLE {table_path} "
+                "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
+            )
