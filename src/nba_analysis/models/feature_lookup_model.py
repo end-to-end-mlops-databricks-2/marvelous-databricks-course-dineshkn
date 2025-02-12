@@ -49,22 +49,22 @@ class FeatureLookUpModel:
         CREATE OR REPLACE TABLE {self.feature_table_name}
         (player_name STRING NOT NULL,
          avg_points DOUBLE,
-         avg_rebounds DOUBLE, 
+         avg_rebounds DOUBLE,
          avg_assists DOUBLE);
         """)
         self.spark.sql(
-            f"ALTER TABLE {self.feature_table_name} "
+            f"ALTER TABLE {self.feature_table_name}"
             f"ADD CONSTRAINT player_pk PRIMARY KEY(player_name);"
         )
         self.spark.sql(
-            f"ALTER TABLE {self.feature_table_name} "
+            f"ALTER TABLE {self.feature_table_name}"
             f"SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
         )
 
         # Populate feature table from training and test sets
         for dataset in ["train_set", "test_set"]:
             self.spark.sql(f"""
-            INSERT INTO {self.feature_table_name} 
+            INSERT INTO {self.feature_table_name}
             SELECT player_name,
                    AVG(pts) as avg_points,
                    AVG(reb) as avg_rebounds,
