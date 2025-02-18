@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import mlflow
 from databricks import feature_engineering
 from databricks.feature_engineering import FeatureFunction, FeatureLookup
@@ -9,9 +10,10 @@ from mlflow.models import infer_signature
 from mlflow.tracking import MlflowClient
 from pyspark.sql import SparkSession
 from sklearn.compose import ColumnTransformer
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score  
+
 
 class FeatureLookUpModel:
     def __init__(self, config, tags, spark: SparkSession):
@@ -30,8 +32,12 @@ class FeatureLookUpModel:
         self.schema_name = self.config.schema_name
 
         # Define table names and function name
-        self.feature_table_name = f"{self.catalog_name}.{self.schema_name}.player_features"
-        self.function_name = f"{self.catalog_name}.{self.schema_name}.calculate_player_experience"
+        self.feature_table_name = (
+            f"{self.catalog_name}.{self.schema_name}.player_features"
+        )
+        self.function_name = (
+            f"{self.catalog_name}.{self.schema_name}.calculate_player_experience"
+        )
 
         # MLflow configuration
         self.experiment_name = self.config.experiment_name_fe
@@ -41,18 +47,24 @@ class FeatureLookUpModel:
         """Create or replace the player_features table and populate it."""
         self.spark.sql(f"""
         CREATE OR REPLACE TABLE {self.feature_table_name}
-        (player_name STRING NOT NULL, 
-         avg_points DOUBLE, 
-         avg_rebounds DOUBLE, 
+        (player_name STRING NOT NULL,
+         avg_points DOUBLE,
+         avg_rebounds DOUBLE,
          avg_assists DOUBLE);
         """)
-        self.spark.sql(f"ALTER TABLE {self.feature_table_name} ADD CONSTRAINT player_pk PRIMARY KEY(player_name);")
-        self.spark.sql(f"ALTER TABLE {self.feature_table_name} SET TBLPROPERTIES (delta.enableChangeDataFeed = true);")
+        self.spark.sql(
+            f"ALTER TABLE {self.feature_table_name}"
+            f"ADD CONSTRAINT player_pk PRIMARY KEY(player_name);"
+        )
+        self.spark.sql(
+            f"ALTER TABLE {self.feature_table_name}"
+            f"SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
+        )
 
         # Populate feature table from training and test sets
-        for dataset in ['train_set', 'test_set']:
+        for dataset in ["train_set", "test_set"]:
             self.spark.sql(f"""
-            INSERT INTO {self.feature_table_name} 
+            INSERT INTO {self.feature_table_name}
             SELECT player_name,
                    AVG(pts) as avg_points,
                    AVG(reb) as avg_rebounds,
@@ -60,7 +72,7 @@ class FeatureLookUpModel:
             FROM {self.catalog_name}.{self.schema_name}.{dataset}
             GROUP BY player_name
             """)
-        
+
         logger.info("✅ Feature table created and populated.")
 
     def define_feature_function(self):
@@ -84,7 +96,7 @@ class FeatureLookUpModel:
         self.train_set = self.spark.table(
             f"{self.catalog_name}.{self.schema_name}.train_set"
         )
-        
+
         self.test_set = self.spark.table(
             f"{self.catalog_name}.{self.schema_name}.test_set"
         ).toPandas()
@@ -112,15 +124,19 @@ class FeatureLookUpModel:
         )
 
         self.training_df = self.training_set.load_df().toPandas()
-        
+
         # Calculate experience for test set
         self.test_set["player_experience"] = self.test_set["draft_year"].apply(
             lambda x: datetime.now().year - int(x) if str(x).isdigit() else 0
         )
 
-        self.X_train = self.training_df[self.num_features + self.cat_features + ["player_experience"]]
+        self.X_train = self.training_df[
+            self.num_features + self.cat_features + ["player_experience"]
+        ]
         self.y_train = self.training_df[self.target]
-        self.X_test = self.test_set[self.num_features + self.cat_features + ["player_experience"]]
+        self.X_test = self.test_set[
+            self.num_features + self.cat_features + ["player_experience"]
+        ]
         self.y_test = self.test_set[self.target]
 
         logger.info("✅ Feature engineering completed.")
@@ -132,14 +148,16 @@ class FeatureLookUpModel:
         preprocessor = ColumnTransformer(
             transformers=[
                 ("cat", OneHotEncoder(handle_unknown="ignore"), self.cat_features)
-            ], 
-            remainder="passthrough"
+            ],
+            remainder="passthrough",
         )
 
-        pipeline = Pipeline(steps=[
-            ("preprocessor", preprocessor),
-            ("regressor", LGBMRegressor(**self.parameters))
-        ])
+        pipeline = Pipeline(
+            steps=[
+                ("preprocessor", preprocessor),
+                ("regressor", LGBMRegressor(**self.parameters)),
+            ]
+        )
 
         mlflow.set_experiment(self.experiment_name)
 
@@ -161,7 +179,7 @@ class FeatureLookUpModel:
             mlflow.log_metric("mse", mse)
             mlflow.log_metric("mae", mae)
             mlflow.log_metric("r2_score", r2)
-            
+
             signature = infer_signature(self.X_train, y_pred)
 
             self.fe.log_model(
@@ -175,27 +193,31 @@ class FeatureLookUpModel:
     def register_model(self):
         """Register model in Unity Catalog"""
         logger.info("🔄 Registering the model in UC...")
-        
+
         registered_model = mlflow.register_model(
             model_uri=f"runs:/{self.run_id}/lightgbm-pipeline-model-fe",
             name=f"{self.catalog_name}.{self.schema_name}.nba_points_model_fe",
-            tags=self.tags
+            tags=self.tags,
         )
 
         latest_version = registered_model.version
-        
+
         client = MlflowClient()
         client.set_registered_model_alias(
             name=f"{self.catalog_name}.{self.schema_name}.nba_points_model_fe",
             alias="latest-model",
-            version=latest_version
+            version=latest_version,
         )
-        
         logger.info(f"✅ Model registered as version {latest_version}.")
 
     def load_latest_model_and_predict(self, X):
-        """Load the trained model from MLflow using Feature Engineering Client and make predictions."""
-        model_uri = f"models:/{self.catalog_name}.{self.schema_name}.nba_points_model_fe@latest-model"
+        """
+        Load the trained model from MLflow using Feature Engineering Client
+        and make predictions.
+        """
+        model_uri = (
+            f"models:/{self.catalog_name}.{self.schema_name}.nba_points_model_fe"
+            f"@latest-model"
+        )
         predictions = self.fe.score_batch(model_uri=model_uri, df=X)
         return predictions
-    

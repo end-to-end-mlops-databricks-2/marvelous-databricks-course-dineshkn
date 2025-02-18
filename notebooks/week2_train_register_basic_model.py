@@ -1,10 +1,11 @@
 # Databricks notebook source
 import sys
 from pathlib import Path
-from mlflow.models import infer_signature
+
 import mlflow
 from pyspark.sql import SparkSession
 from sklearn.model_selection import train_test_split
+
 from src.nba_analysis.config import ProjectConfig
 from src.nba_analysis.models.basic_model import BasicModel
 
@@ -38,14 +39,11 @@ basic_model.prepare_features()
 
 # Split the data
 train_data, test_data = train_test_split(
-    basic_model.data, 
-    test_size=0.2, 
-    random_state=42
-    )
+    basic_model.data, test_size=0.2, random_state=42
+)
 
 # Convert to Spark DataFrames and save as tables
-spark.createDataFrame(
-    train_data).write.mode("overwrite").saveAsTable(
+spark.createDataFrame(train_data).write.mode("overwrite").saveAsTable(
     f"{config.catalog_name}.{config.schema_name}.nba_train_set"
 )
 spark.createDataFrame(test_data).write.mode("overwrite").saveAsTable(
@@ -64,8 +62,7 @@ basic_model.log_model()
 # COMMAND ----------
 
 runs = mlflow.search_runs(
-    experiment_names=["/Shared/nba-points-basic"], 
-    filter_string="tags.branch='week2'"
+    experiment_names=["/Shared/nba-points-basic"], filter_string="tags.branch='week2'"
 )
 
 if not runs.empty:
@@ -97,9 +94,9 @@ basic_model.register_model()
 # Make predictions
 test_set = spark.table(
     f"{config.catalog_name}.{config.schema_name}.nba_test_set"
-    ).limit(10)
+).limit(10)
 X_test = test_set.drop(config.target).toPandas()
 predictions = basic_model.model.predict(
     X_test[config.num_features]
-    )  # Use num_features from config
+)  # Use num_features from config
 print("Predictions:", predictions)

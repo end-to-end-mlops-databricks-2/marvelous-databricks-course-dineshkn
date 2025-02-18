@@ -1,16 +1,10 @@
 import mlflow
-import pandas as pd
 from loguru import logger
 from mlflow.tracking import MlflowClient
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from mlflow.models import infer_signature
-from pyspark.sql import SparkSession
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from lightgbm import LGBMRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
 
 class BasicModel:
     def __init__(self, config, tags, spark=None):
@@ -28,11 +22,9 @@ class BasicModel:
             print("Attempting to load from Databricks volume...")
             # Add header=True and inferSchema=True
             self.data = self.spark.read.csv(
-                self.config.input_data,
-                header=True,
-                inferSchema=True
-                ).toPandas()
-            print(f"Successfully loaded data from Databricks volume")
+                self.config.input_data, header=True, inferSchema=True
+            ).toPandas()
+            print("Successfully loaded data from Databricks volume")
         except Exception as e:
             print(f"Error loading from Databricks: {str(e)}")
             raise  # Re-raise the exception instead of falling back to local file
@@ -103,7 +95,7 @@ class BasicModel:
             y_pred = self.model.predict(self.X)  # Get predictions on full dataset
             signature = mlflow.models.infer_signature(
                 self.X, y_pred
-                )  # Infer input-output schema
+            )  # Infer input-output schema
 
             # Log model with signature
             mlflow.sklearn.log_model(
