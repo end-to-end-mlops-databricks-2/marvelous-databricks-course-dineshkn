@@ -89,29 +89,6 @@ feature_serving = FeatureServing(
 
 # COMMAND ----------
 
-def create_online_table(self):
-        """
-        Creates an online table based on the feature table.
-        """
-        spec = OnlineTableSpec(
-            primary_key_columns=["player_name"],  # Changed from Id to player_name
-            source_table_full_name=self.feature_table_name,
-            run_triggered=True,
-            perform_full_copy=False,
-        )
-        self.workspace.online_tables.create(name=self.online_table_name, spec=spec)
-        print(spec.to_dict())
-
-# COMMAND ----------
-
-create_online_table()
-
-# COMMAND ----------
-
-print(spec.to_dict())
-
-# COMMAND ----------
-
 # Create online table
 feature_serving.create_online_table()
 
@@ -127,13 +104,34 @@ feature_serving.deploy_or_update_serving_endpoint()
 
 # COMMAND ----------
 
+# After feature_serving.deploy_or_update_serving_endpoint()
+print("Available endpoints:", [
+    endpoint.name 
+    for endpoint in feature_serving.workspace.serving_endpoints.list()
+])
+
+# Check endpoint status
+endpoint = feature_serving.workspace.serving_endpoints.get(feature_serving.endpoint_name)
+print(f"Endpoint state: {endpoint.state}")
+
+# Wait for endpoint to be ready
+print("Waiting for endpoint to be ready...")
+while endpoint.state.ready == "NOT_READY":
+    time.sleep(10)  # Wait 10 seconds between checks
+    endpoint = feature_serving.workspace.endpoints.get(feature_serving.endpoint_name)
+    print(f"Current state: {endpoint.state}")
+    
+print("Endpoint ready, attempting request...")
+
+# COMMAND ----------
+
 # Test the endpoint
 start_time = time.time()
 serving_endpoint = f"https://{os.environ['DBR_HOST']}/serving-endpoints/{endpoint_name}/invocations"
 response = requests.post(
     f"{serving_endpoint}",
     headers={"Authorization": f"Bearer {os.environ['DBR_TOKEN']}"},
-    json={"dataframe_records": [{"player_name": "LeBron James"}]},
+    json={"dataframe_records": [{"player_name": "Stephen Curry"}]},
 )
 end_time = time.time()
 execution_time = end_time - start_time
@@ -143,3 +141,16 @@ execution_time = end_time - start_time
 print("Response status:", response.status_code)
 print("Response text:", response.text)
 print("Execution time:", execution_time, "seconds")
+
+# COMMAND ----------
+
+# another way to call the endpoint
+response = requests.post(
+    f"{serving_endpoint}",
+    headers={"Authorization": f"Bearer {os.environ['DBR_TOKEN']}"},
+    json={"dataframe_split": {"columns": ["player_name"], "data": [["Stephen Curry"]]}}
+)
+
+# COMMAND ----------
+
+

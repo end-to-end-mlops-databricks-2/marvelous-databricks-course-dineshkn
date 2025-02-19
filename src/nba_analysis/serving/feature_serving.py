@@ -17,13 +17,11 @@ class FeatureServing:
         self.fe = feature_engineering.FeatureEngineeringClient()
 
     def create_online_table(self):
-        """
-        Creates an online table based on the feature table.
-        """
+        """Creates an online table based on the feature table."""
         spec = OnlineTableSpec(
-            primary_key_columns=["player_name"],  # Changed from Id to player_name
+            primary_key_columns=["player_name"],  # Just player_name since we aggregated
             source_table_full_name=self.feature_table_name,
-            run_triggered=True,
+            run_triggered={"triggered": True},
             perform_full_copy=False,
         )
         self.workspace.online_tables.create(name=self.online_table_name, spec=spec)
