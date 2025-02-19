@@ -5,7 +5,10 @@ from databricks.sdk.service.catalog import OnlineTableSpec
 from databricks.sdk.service.serving import EndpointCoreConfigInput, ServedEntityInput
 
 class FeatureServing:
-    def __init__(self, feature_table_name: str, feature_spec_name: str, endpoint_name: str):
+    def __init__(self, 
+             feature_table_name: str,
+             feature_spec_name: str,
+             endpoint_name: str):
         """
         Initializes the Prediction Serving Manager.
         """
@@ -19,7 +22,7 @@ class FeatureServing:
     def create_online_table(self):
         """Creates an online table based on the feature table."""
         spec = OnlineTableSpec(
-            primary_key_columns=["player_name"],  # Just player_name since we aggregated
+            primary_key_columns=["player_name"],# Just player_name since we aggregated
             source_table_full_name=self.feature_table_name,
             run_triggered={"triggered": True},
             perform_full_copy=False,
@@ -56,7 +59,7 @@ class FeatureServing:
         Deploys the feature serving endpoint in Databricks.
         """
         endpoint_exists = any(
-            item.name == self.endpoint_name 
+            item.name == self.endpoint_name
             for item in self.workspace.serving_endpoints.list()
         )
         

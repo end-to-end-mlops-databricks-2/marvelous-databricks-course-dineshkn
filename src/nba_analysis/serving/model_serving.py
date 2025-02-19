@@ -18,7 +18,7 @@ class ModelServing:
         """Get the latest version of the model."""
         client = mlflow.MlflowClient()
         latest_version = client.get_model_version_by_alias(
-            self.model_name, 
+            self.model_name,
             alias="latest-model"
         ).version
         print(f"Latest model version: {latest_version}")
@@ -39,7 +39,7 @@ class ModelServing:
             scale_to_zero: If True, endpoint scales to 0 when unused
         """
         endpoint_exists = any(
-            item.name == self.endpoint_name 
+            item.name == self.endpoint_name
             for item in self.workspace.serving_endpoints.list()
         )
 

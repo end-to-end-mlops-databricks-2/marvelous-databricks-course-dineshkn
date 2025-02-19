@@ -25,7 +25,8 @@ mlflow.set_registry_uri("databricks-uc")
 # COMMAND ----------
 
 # get environment variables
-os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils() \
+    .notebook().getContext().apiToken().get()
 os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 
 # COMMAND ----------
@@ -46,7 +47,9 @@ df = pd.concat([train_set, test_set])
 # COMMAND ----------
 
 # Load the model with pipeline
-model = mlflow.sklearn.load_model(f"models:/{catalog_name}.{schema_name}.nba_points_model_basic@latest-model")
+model = mlflow.sklearn.load_model(
+    f"models:/{catalog_name}.{schema_name}.nba_points_model_basic@latest-model"
+)
 
 # COMMAND ----------
 
@@ -106,12 +109,14 @@ feature_serving.deploy_or_update_serving_endpoint()
 
 # After feature_serving.deploy_or_update_serving_endpoint()
 print("Available endpoints:", [
-    endpoint.name 
+    endpoint.name
     for endpoint in feature_serving.workspace.serving_endpoints.list()
 ])
 
 # Check endpoint status
-endpoint = feature_serving.workspace.serving_endpoints.get(feature_serving.endpoint_name)
+endpoint = feature_serving.workspace.serving_endpoints.get(
+    feature_serving.endpoint_name
+)
 print(f"Endpoint state: {endpoint.state}")
 
 # Wait for endpoint to be ready

@@ -13,7 +13,8 @@ from src.nba_analysis.serving.model_serving import ModelServing
 # Initialize Spark and get environment variables
 spark = SparkSession.builder.getOrCreate()
 dbutils = DBUtils(spark)
-os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils() \
+    .notebook().getContext().apiToken().get()
 os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 
 # COMMAND ----------
@@ -63,8 +64,13 @@ required_columns = [
 # COMMAND ----------
 
 # Sample records from test set
-test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").toPandas()
-sampled_records = test_set[required_columns].sample(n=100, replace=True).to_dict(orient="records")
+test_set = spark.table(
+    f"{config.catalog_name}.{config.schema_name}.test_set"
+    ).toPandas()
+
+sampled_records = test_set[required_columns] \
+    .sample(n=100, replace=True) \
+    .to_dict(orient="records")
 dataframe_records = [[record] for record in sampled_records]
 
 # COMMAND ----------
@@ -92,7 +98,7 @@ print(f"Response Text: {response_text}")
 
 # Add this after model_serving.deploy_or_update_serving_endpoint()
 print("Available endpoints:", [
-    endpoint.name 
+    endpoint.name
     for endpoint in model_serving.workspace.serving_endpoints.list()
 ])
 
@@ -108,14 +114,18 @@ print(f"Full endpoint URL: https://{os.environ['DBR_HOST']}/serving-endpoints/nb
 import time
 
 # Check endpoint status
-endpoint = model_serving.workspace.serving_endpoints.get(model_serving.endpoint_name)
+endpoint = model_serving.workspace.serving_endpoints.get(
+    model_serving.endpoint_name
+)
 print(f"Endpoint state: {endpoint.state}")
 
 # Wait for it to be ready
 while endpoint.state.ready == "NOT_READY":
     print("Waiting for endpoint to be ready...")
     time.sleep(10)  # Wait 10 seconds before checking again
-    endpoint = model_serving.workspace.serving_endpoints.get(model_serving.endpoint_name)
+    endpoint = model_serving.workspace.serving_endpoints.get(
+        model_serving.endpoint_name
+        )
     print(f"Current state: {endpoint.state}")
 
 if endpoint.state.ready == "READY":
