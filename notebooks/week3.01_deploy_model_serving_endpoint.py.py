@@ -2,9 +2,11 @@
 import os
 import time
 from typing import Dict, List
+
 import requests
 from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
+
 from src.nba_analysis.config import ProjectConfig
 from src.nba_analysis.serving.model_serving import ModelServing
 
@@ -13,8 +15,9 @@ from src.nba_analysis.serving.model_serving import ModelServing
 # Initialize Spark and get environment variables
 spark = SparkSession.builder.getOrCreate()
 dbutils = DBUtils(spark)
-os.environ["DBR_TOKEN"] = dbutils.notebook.entry_point.getDbutils() \
-    .notebook().getContext().apiToken().get()
+os.environ["DBR_TOKEN"] = (
+    dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+)
 os.environ["DBR_HOST"] = spark.conf.get("spark.databricks.workspaceUrl")
 
 # COMMAND ----------
@@ -29,7 +32,7 @@ schema_name = config.schema_name
 # Initialize model serving
 model_serving = ModelServing(
     model_name=f"{catalog_name}.{schema_name}.nba_points_model_basic",
-    endpoint_name="nba-points-model-serving"
+    endpoint_name="nba-points-model-serving",
 )
 
 # COMMAND ----------
@@ -58,7 +61,7 @@ required_columns = [
     "country",
     "draft_year",
     "draft_round",
-    "draft_number"
+    "draft_number",
 ]
 
 # COMMAND ----------
@@ -66,14 +69,15 @@ required_columns = [
 # Sample records from test set
 test_set = spark.table(
     f"{config.catalog_name}.{config.schema_name}.test_set"
-    ).toPandas()
+).toPandas()
 
-sampled_records = test_set[required_columns] \
-    .sample(n=100, replace=True) \
-    .to_dict(orient="records")
+sampled_records = (
+    test_set[required_columns].sample(n=100, replace=True).to_dict(orient="records")
+)
 dataframe_records = [[record] for record in sampled_records]
 
 # COMMAND ----------
+
 
 def call_endpoint(record: List[Dict]):
     """
@@ -87,6 +91,7 @@ def call_endpoint(record: List[Dict]):
     )
     return response.status_code, response.text
 
+
 # COMMAND ----------
 
 # Test with one sample record
@@ -97,26 +102,23 @@ print(f"Response Text: {response_text}")
 # COMMAND ----------
 
 # Add this after model_serving.deploy_or_update_serving_endpoint()
-print("Available endpoints:", [
-    endpoint.name
-    for endpoint in model_serving.workspace.serving_endpoints.list()
-])
+print(
+    "Available endpoints:",
+    [endpoint.name for endpoint in model_serving.workspace.serving_endpoints.list()],
+)
 
 # COMMAND ----------
 
 # Before calling the endpoint
-print(f"Attempting to access endpoint: nba-points-model-serving")
-print(f"Full endpoint URL: https://{os.environ['DBR_HOST']}/serving-endpoints/nba-points-model-serving/invocations")
+print("Attempting to access endpoint: nba-points-model-serving")
+print(
+    f"Full endpoint URL: https://{os.environ['DBR_HOST']}/serving-endpoints/nba-points-model-serving/invocations"
+)
 
 # COMMAND ----------
 
-# After deploying the endpoint
-import time
-
 # Check endpoint status
-endpoint = model_serving.workspace.serving_endpoints.get(
-    model_serving.endpoint_name
-)
+endpoint = model_serving.workspace.serving_endpoints.get(model_serving.endpoint_name)
 print(f"Endpoint state: {endpoint.state}")
 
 # Wait for it to be ready
@@ -125,7 +127,7 @@ while endpoint.state.ready == "NOT_READY":
     time.sleep(10)  # Wait 10 seconds before checking again
     endpoint = model_serving.workspace.serving_endpoints.get(
         model_serving.endpoint_name
-        )
+    )
     print(f"Current state: {endpoint.state}")
 
 if endpoint.state.ready == "READY":
@@ -145,7 +147,3 @@ print(f"Latest version: {model_serving.get_latest_model_version()}")
 for i in range(len(dataframe_records)):
     call_endpoint(dataframe_records[i])
     time.sleep(0.2)
-
-# COMMAND ----------
-
-

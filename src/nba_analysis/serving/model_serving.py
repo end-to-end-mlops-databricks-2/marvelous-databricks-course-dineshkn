@@ -1,9 +1,7 @@
 import mlflow
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.serving import (
-    EndpointCoreConfigInput,
-    ServedEntityInput,
-)
+from databricks.sdk.service.serving import EndpointCoreConfigInput, ServedEntityInput
+
 
 class ModelServing:
     def __init__(self, model_name: str, endpoint_name: str):
@@ -18,8 +16,7 @@ class ModelServing:
         """Get the latest version of the model."""
         client = mlflow.MlflowClient()
         latest_version = client.get_model_version_by_alias(
-            self.model_name,
-            alias="latest-model"
+            self.model_name, alias="latest-model"
         ).version
         print(f"Latest model version: {latest_version}")
         return latest_version
@@ -28,11 +25,11 @@ class ModelServing:
         self,
         version: str = "latest",
         workload_size: str = "Small",
-        scale_to_zero: bool = True
+        scale_to_zero: bool = True,
     ):
         """
         Deploys the model serving endpoint in Databricks.
-        
+
         Args:
             version: Version of the model to deploy
             workload_size: Workload size (number of concurrent requests)
@@ -66,7 +63,5 @@ class ModelServing:
             )
         else:
             self.workspace.serving_endpoints.update_config(
-                name=self.endpoint_name,
-                served_entities=served_entities
+                name=self.endpoint_name, served_entities=served_entities
             )
-            

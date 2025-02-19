@@ -4,11 +4,11 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import OnlineTableSpec
 from databricks.sdk.service.serving import EndpointCoreConfigInput, ServedEntityInput
 
+
 class FeatureServing:
-    def __init__(self, 
-             feature_table_name: str,
-             feature_spec_name: str,
-             endpoint_name: str):
+    def __init__(
+        self, feature_table_name: str, feature_spec_name: str, endpoint_name: str
+    ):
         """
         Initializes the Prediction Serving Manager.
         """
@@ -22,7 +22,7 @@ class FeatureServing:
     def create_online_table(self):
         """Creates an online table based on the feature table."""
         spec = OnlineTableSpec(
-            primary_key_columns=["player_name"],# Just player_name since we aggregated
+            primary_key_columns=["player_name"],  # Just player_name since we aggregated
             source_table_full_name=self.feature_table_name,
             run_triggered={"triggered": True},
             perform_full_copy=False,
@@ -40,20 +40,16 @@ class FeatureServing:
                 feature_names=[
                     "age",
                     "team_abbreviation",
-                    "Predicted_Points"  # Changed from Predicted_SalePrice
+                    "Predicted_Points",  # Changed from Predicted_SalePrice
                 ],
             )
         ]
         self.fe.create_feature_spec(
-            name=self.feature_spec_name,
-            features=features,
-            exclude_columns=None
+            name=self.feature_spec_name, features=features, exclude_columns=None
         )
 
     def deploy_or_update_serving_endpoint(
-        self,
-        workload_size: str = "Small",
-        scale_to_zero: bool = True
+        self, workload_size: str = "Small", scale_to_zero: bool = True
     ):
         """
         Deploys the feature serving endpoint in Databricks.
@@ -62,12 +58,12 @@ class FeatureServing:
             item.name == self.endpoint_name
             for item in self.workspace.serving_endpoints.list()
         )
-        
+
         served_entities = [
             ServedEntityInput(
                 entity_name=self.feature_spec_name,
                 scale_to_zero_enabled=scale_to_zero,
-                workload_size=workload_size
+                workload_size=workload_size,
             )
         ]
 
@@ -80,7 +76,5 @@ class FeatureServing:
             )
         else:
             self.workspace.serving_endpoints.update_config(
-                name=self.endpoint_name,
-                served_entities=served_entities
+                name=self.endpoint_name, served_entities=served_entities
             )
-            
