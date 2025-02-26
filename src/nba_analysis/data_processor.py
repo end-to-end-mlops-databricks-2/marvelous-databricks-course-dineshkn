@@ -7,9 +7,13 @@ from nba_analysis.config import Config
 
 
 class DataProcessor:
-    def __init__(self):
-        self.config = Config()
-        self.data = None
+    def __init__(self, input_df: pd.DataFrame, config: Config):
+        self.config = config
+
+        if input_df:
+            self.df = input_df
+        else:
+            self.load_data()
 
     def load_data(self):
         """Load the raw NBA players data."""
