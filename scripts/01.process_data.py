@@ -4,9 +4,10 @@ Script for preprocessing NBA player data
 """
 
 import argparse
-import os
+import logging
 
 import pandas as pd
+import yaml
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
 from sklearn.model_selection import train_test_split
@@ -22,12 +23,14 @@ def parse_args():
 
 
 def main():
+    logger = logging.getLogger(__name__)
     args = parse_args()
+    root_path = args.root_path
+    config_path = f"{root_path}/project_config.yml"
+    config = Config.from_yaml(config_path=config_path, env=args.env)
 
-    # Setup config and Spark
-    config = Config.from_yaml(
-        os.path.join(args.root_path, "project_config.yml"), env=args.env
-    )
+    logger.info("Configuration loaded:")
+    logger.info(yaml.dump(config, default_flow_style=False))
     spark = SparkSession.builder.getOrCreate()
 
     print(f"Loading data from: {config.data}")
