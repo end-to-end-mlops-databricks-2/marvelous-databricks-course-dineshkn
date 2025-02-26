@@ -110,4 +110,4 @@ targets:
       host: https://dbc-4894232b-9fc5.cloud.databricks.com
       root_path: /Shared/.bundle/${bundle.target}/${bundle.name}
     variables:
-      schedule_pause_status: UNPAUSED
+      schedule_pause_status: UNPAUSED # testing
