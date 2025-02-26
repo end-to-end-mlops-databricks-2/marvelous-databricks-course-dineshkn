@@ -26,7 +26,7 @@ def main():
     logger = logging.getLogger(__name__)
     args = parse_args()
     root_path = args.root_path
-    config_path = f"{root_path}/project_config.yml"
+    config_path = f"{root_path}/files/project_config.yml"
     config = Config.from_yaml(config_path=config_path, env=args.env)
 
     logger.info("Configuration loaded:")
