@@ -89,7 +89,7 @@ resources:
 
 targets:
   dev:
-    cluster_id: your-cluster-id
+    cluster_id: "0203-030303-kb1gn7l"
     default: true
     mode: development
     workspace:
