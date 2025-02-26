@@ -9,6 +9,7 @@ import mlflow
 from loguru import logger
 from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
+from sklearn.metrics import mean_squared_error, r2_score
 
 from nba_analysis.config import Config, Tags
 from nba_analysis.models.basic_model import BasicModel
@@ -95,8 +96,20 @@ def main():
         f"{config.catalog_name}.{config.schema_name}.test_set"
     ).limit(100)
 
-    # Check if model has improved over previous versions
-    model_improved = True  # In future, implement proper model evaluation
+    # Use the test set to evaluate the model
+    test_df = test_set.toPandas()
+    X_test = test_df[config.num_features]
+    y_test = test_df[config.target]
+    predictions = basic_model.model.predict(X_test)
+
+    # Calculate and log evaluation metrics
+    mse = mean_squared_error(y_test, predictions)
+    r2 = r2_score(y_test, predictions)
+    logger.info(f"Test MSE: {mse:.4f}")
+    logger.info(f"Test R²: {r2:.4f}")
+
+    # Determine if model has improved
+    model_improved = r2 > 0.7  # Set a threshold
 
     if model_improved:
         # Register the model
