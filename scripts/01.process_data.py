@@ -34,15 +34,17 @@ def main():
     spark = SparkSession.builder.getOrCreate()
 
     # Use the data processor to load the original dataset
-    data_processor = DataProcessor(input_df=None, config=config)
+    data_processor = DataProcessor(
+        input_df=None, config=config, spark=spark
+    )  # Pass spark here
     data_processor.preprocess()
 
     # Generate synthetic data
     synthetic_data = data_processor.make_synthetic_data(num_rows=100)
     logging.info("Synthetic data generated")
 
-    # Create new processor with synthetic data
-    new_processor = DataProcessor(input_df=synthetic_data, config=config)
+    # Later, also pass spark to the new processor
+    new_processor = DataProcessor(input_df=synthetic_data, config=config, spark=spark)
 
     # Split data
     new_processor.split_data(test_size=0.2, random_state=42)
