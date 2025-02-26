@@ -67,10 +67,17 @@ def main():
     print(f"Saving train/test data to {catalog_name}.{schema_name}")
 
     # Save train set
+
     train_spark = spark.createDataFrame(train_df).withColumn(
         "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
     )
-    train_spark.write.mode("overwrite").saveAsTable(
+    train_spark = train_spark.withColumn("gp", col("gp").cast("int"))
+    train_spark = train_spark.selectExpr(
+        *[f"`{c.lower()}` AS {c.lower()}" for c in train_spark.columns]
+    )
+    train_df = train_df.loc[:, ~train_df.columns.duplicated()]
+
+    train_spark.write.mode("overwrite").option("mergeSchema", "true").saveAsTable(
         f"{catalog_name}.{schema_name}.train_set"
     )
 
