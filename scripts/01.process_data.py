@@ -7,7 +7,6 @@ import argparse
 import logging
 
 import yaml
-from pyspark.sql import SparkSession
 
 from nba_analysis.config import Config
 from nba_analysis.data_processor import DataProcessor
@@ -33,14 +32,20 @@ def main():
     logging.info("Configuration loaded:")
     logging.info(yaml.dump(config, default_flow_style=False))
 
-    spark = SparkSession.builder.getOrCreate()
+    # spark = SparkSession.builder.getOrCreate()
 
     # Use the data processor to load the original dataset
-    data_processor = DataProcessor(input_df=None, config=config)  # Pass spark here
-    data_processor.preprocess()
+    data_processor = DataProcessor(input_df=None, config=config)
+    (
+        data_processor.clean_data()
+        .add_derived_features()
+        .filter_data(min_games=10)
+        .get_processed_data()
+    )
 
     # Generate synthetic data
     synthetic_data = data_processor.make_synthetic_data(num_rows=100)
+
     logging.info("Synthetic data generated")
 
     # Later, also pass spark to the new processor
@@ -53,7 +58,7 @@ def main():
 
     # Save to catalog
     logging.info("Saving data to catalog")
-    new_processor.save_traing_data_to_catalog()
+    new_processor.save_to_catalog()
 
     logging.info("✅ Data preprocessing complete and tables created")
 

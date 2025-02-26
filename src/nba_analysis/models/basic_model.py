@@ -22,7 +22,7 @@ class BasicModel:
             print("Attempting to load from Databricks volume...")
             # Add header=True and inferSchema=True
             self.data = self.spark.read.csv(
-                self.config.input_data, header=True, inferSchema=True
+                self.config.data, header=True, inferSchema=True
             ).toPandas()
             print("Successfully loaded data from Databricks volume")
         except Exception as e:

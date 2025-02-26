@@ -118,55 +118,54 @@ class DataProcessor:
                 "SET TBLPROPERTIES (delta.enableChangeDataFeed = true);"
             )
 
+    def make_synthetic_data(self, num_rows=10):
+        """
+        Generates synthetic NBA player data based on the input DataFrame
+        """
+        synthetic_data = pd.DataFrame()
 
-def make_synthetic_data(self, num_rows=10):
-    """
-    Generates synthetic NBA player data based on the input DataFrame
-    """
-    synthetic_data = pd.DataFrame()
+        for column in self.data.columns:
+            if column == self.config.id_column:
+                # Generate random player names
+                first_names = [
+                    "James",
+                    "Michael",
+                    "Kevin",
+                    "Stephen",
+                    "LeBron",
+                    "Kobe",
+                    "Shaq",
+                    "Magic",
+                ]
+                last_names = [
+                    "Johnson",
+                    "Jordan",
+                    "Bryant",
+                    "James",
+                    "Curry",
+                    "Durant",
+                    "Davis",
+                    "Thompson",
+                ]
 
-    for column in self.data.columns:
-        if column == self.config.id_column:
-            # Generate random player names
-            first_names = [
-                "James",
-                "Michael",
-                "Kevin",
-                "Stephen",
-                "LeBron",
-                "Kobe",
-                "Shaq",
-                "Magic",
-            ]
-            last_names = [
-                "Johnson",
-                "Jordan",
-                "Bryant",
-                "James",
-                "Curry",
-                "Durant",
-                "Davis",
-                "Thompson",
-            ]
+                synthetic_data[column] = [
+                    f"{np.random.choice(first_names)} {np.random.choice(last_names)}"
+                    for _ in range(num_rows)
+                ]
 
-            synthetic_data[column] = [
-                f"{np.random.choice(first_names)} {np.random.choice(last_names)}"
-                for _ in range(num_rows)
-            ]
+            elif pd.api.types.is_numeric_dtype(self.data[column]):
+                # For numeric columns (stats, measurements)
+                synthetic_data[column] = np.random.uniform(
+                    self.data[column].min(), self.data[column].max(), num_rows
+                )
+            elif pd.api.types.is_string_dtype(self.data[column]):
+                # For categorical columns (team, college, etc.)
+                synthetic_data[column] = np.random.choice(
+                    self.data[column].unique(),
+                    num_rows,
+                    p=self.data[column].value_counts(normalize=True),
+                )
+            else:
+                synthetic_data[column] = np.random.choice(self.data[column], num_rows)
 
-        elif pd.api.types.is_numeric_dtype(self.data[column]):
-            # For numeric columns (stats, measurements)
-            synthetic_data[column] = np.random.uniform(
-                self.data[column].min(), self.data[column].max(), num_rows
-            )
-        elif pd.api.types.is_string_dtype(self.data[column]):
-            # For categorical columns (team, college, etc.)
-            synthetic_data[column] = np.random.choice(
-                self.data[column].unique(),
-                num_rows,
-                p=self.data[column].value_counts(normalize=True),
-            )
-        else:
-            synthetic_data[column] = np.random.choice(self.data[column], num_rows)
-
-    return synthetic_data
+        return synthetic_data
