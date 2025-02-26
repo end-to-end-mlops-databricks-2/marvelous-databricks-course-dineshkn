@@ -58,7 +58,7 @@ def main():
 
     # Parse arguments
     args = parse_args()
-    config_path = f"{args.root_path}/project_config.yml"
+    config_path = f"{args.root_path}/files/project_config.yml"
 
     # Load configuration
     config = Config.from_yaml(config_path=config_path, env=args.env)

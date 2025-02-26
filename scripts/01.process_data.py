@@ -5,7 +5,6 @@ Script for preprocessing NBA player data
 
 import argparse
 import logging
-import os
 
 import yaml
 from pyspark.sql import SparkSession
@@ -23,10 +22,13 @@ def parse_args():
 
 def main():
     args = parse_args()
+    root_path = args.root_path
+    config_path = f"{root_path}/files/project_config.yml"
 
     # Setup config and Spark
     config = Config.from_yaml(
-        os.path.join(args.root_path, "project_config.yml"), env=args.env
+        config_path=config_path,
+        env=args.env,
     )
     logging.info("Configuration loaded:")
     logging.info(yaml.dump(config, default_flow_style=False))

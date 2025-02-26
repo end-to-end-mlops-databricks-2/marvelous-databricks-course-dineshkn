@@ -37,7 +37,7 @@ def main():
     args = parse_args()
 
     # Setup configuration and Spark
-    config_path = f"{args.root_path}/project_config.yml"
+    config_path = f"{args.root_path}/files/project_config.yml"
     spark = SparkSession.builder.getOrCreate()
     dbutils = DBUtils(spark)
 
