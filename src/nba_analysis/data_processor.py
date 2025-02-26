@@ -7,17 +7,17 @@ import pandas as pd
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
 from sklearn.model_selection import train_test_split
 
-from nba_analysis.config import ProjectConfig
+from nba_analysis.config import Config
 
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-print(f"Looking for file at: {ProjectConfig.RAW_DATA_FILE}")
+print(f"Looking for file at: {Config.RAW_DATA_FILE}")
 
 
 class DataProcessor:
     def __init__(self):
-        self.config = ProjectConfig()
+        self.config = Config()
         self.data = None
 
     def load_data(self):
