@@ -7,7 +7,6 @@ import argparse
 import logging
 
 import yaml
-from pyspark.sql import SparkSession
 
 from nba_analysis.config import Config
 from nba_analysis.data_processor import DataProcessor
@@ -35,7 +34,7 @@ def main():
     logger.info("Configuration loaded:")
     logger.info(yaml.dump(config.model_dump(), default_flow_style=False))
 
-    spark = SparkSession.builder.getOrCreate()
+    # spark = SparkSession.builder.getOrCreate() # avoid pre-commit error
 
     # Create DataProcessor with None input_df to load from configuration
     logger.info("Initializing DataProcessor")
