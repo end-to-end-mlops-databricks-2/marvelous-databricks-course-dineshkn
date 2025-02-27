@@ -87,6 +87,10 @@ class DataProcessor:
                 f"{self.config.catalog_name}.{self.config.schema_name}.test_set"
             )
 
+            # Drop existing tables to avoid schema conflicts
+            spark.sql(f"DROP TABLE IF EXISTS {train_table}")
+            spark.sql(f"DROP TABLE IF EXISTS {test_table}")
+
             train_spark.write.mode("overwrite").saveAsTable(train_table)
             test_spark.write.mode("overwrite").saveAsTable(test_table)
 
