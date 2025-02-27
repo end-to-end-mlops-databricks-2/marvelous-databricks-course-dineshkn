@@ -64,7 +64,7 @@ def main():
         model_name=f"{catalog_name}.{schema_name}.nba_points_model_basic",
         endpoint_name=f"nba-points-model-serving-{args.env}",
     )
-    model_serving.deploy_or_update_serving_endpoint(version=model_version)
+    model_serving.deploy_or_update_serving_endpoint()
     logger.info("Model serving endpoint deployed/updated")
 
     # Set up feature table and serving
