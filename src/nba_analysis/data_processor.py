@@ -27,7 +27,7 @@ class DataProcessor:
 
     def load_data(self):
         """Load data from the file specified in config"""
-        file_path = self.config.input_data
+        file_path = self.config.data
         self.data = pd.read_csv(file_path)
         return self
 
