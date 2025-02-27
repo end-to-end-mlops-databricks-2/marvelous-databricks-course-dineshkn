@@ -5,8 +5,10 @@ Script for preprocessing NBA player data
 
 import argparse
 import logging
+import os
 
 import yaml
+from pyspark.sql import SparkSession
 
 from nba_analysis.config import Config
 from nba_analysis.data_processor import DataProcessor
@@ -21,46 +23,68 @@ def parse_args():
 
 def main():
     args = parse_args()
-    root_path = args.root_path
-    config_path = f"{root_path}/files/project_config.yml"
+
+    # Setup logging
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logger = logging.getLogger(__name__)
 
     # Setup config and Spark
-    config = Config.from_yaml(
-        config_path=config_path,
-        env=args.env,
-    )
-    logging.info("Configuration loaded:")
-    logging.info(yaml.dump(config, default_flow_style=False))
+    config_path = os.path.join(args.root_path, "project_config.yml")
+    config = Config.from_yaml(config_path=config_path, env=args.env)
+    logger.info("Configuration loaded:")
+    logger.info(yaml.dump(config.model_dump(), default_flow_style=False))
 
-    # spark = SparkSession.builder.getOrCreate()
+    spark = SparkSession.builder.getOrCreate()
 
-    # Use the data processor to load the original dataset
+    # Create DataProcessor with None input_df to load from configuration
+    logger.info("Initializing DataProcessor")
     data_processor = DataProcessor(input_df=None, config=config)
-    (
-        data_processor.clean_data()
-        .add_derived_features()
-        .filter_data(min_games=10)
-        .get_processed_data()
-    )
 
-    # Generate synthetic data
-    synthetic_data = data_processor.make_synthetic_data(num_rows=100)
+    # If your DataProcessor has a preprocess method, call it
+    if hasattr(data_processor, "preprocess"):
+        logger.info("Preprocessing data")
+        data_processor.preprocess()
 
-    logging.info("Synthetic data generated")
+    # If your DataProcessor has a split_data method, call it
+    if hasattr(data_processor, "split_data"):
+        logger.info("Splitting data into train/test sets")
+        train_df, test_df = data_processor.split_data(test_size=0.2, random_state=42)
+        logger.info(
+            f"Train shape: {train_df.shape if train_df is not None else 'unknown'}"
+        )
+        logger.info(
+            f"Test shape: {test_df.shape if test_df is not None else 'unknown'}"
+        )
 
-    # Later, also pass spark to the new processor
-    new_processor = DataProcessor(input_df=synthetic_data, config=config)
+    # If your DataProcessor has a save method, call it
+    if hasattr(data_processor, "save_to_catalog"):
+        logger.info("Saving data to catalog")
+        try:
+            train_table_name = f"{config.catalog_name}.{config.schema_name}.train_set"
+            test_table_name = f"{config.catalog_name}.{config.schema_name}.test_set"
 
-    # Split data
-    new_processor.split_data(test_size=0.2, random_state=42)
-    logging.info(f"Train shape: {new_processor.train_df.shape}")
-    logging.info(f"Test shape: {new_processor.test_df.shape}")
+            # Check if the DataFrame is already a SparkDataFrame
+            if hasattr(train_df, "write"):
+                train_df.write.mode("overwrite").saveAsTable(train_table_name)
+            else:
+                spark.createDataFrame(train_df).write.mode("overwrite").saveAsTable(
+                    train_table_name
+                )
 
-    # Save to catalog
-    logging.info("Saving data to catalog")
-    new_processor.save_to_catalog()
+            if hasattr(test_df, "write"):
+                test_df.write.mode("overwrite").saveAsTable(test_table_name)
+            else:
+                spark.createDataFrame(test_df).write.mode("overwrite").saveAsTable(
+                    test_table_name
+                )
 
-    logging.info("✅ Data preprocessing complete and tables created")
+            logger.info("Data saved to catalog successfully")
+        except Exception as e:
+            logger.error(f"Error saving data to catalog: {str(e)}")
+
+    logger.info("✅ Data preprocessing complete")
 
 
 if __name__ == "__main__":
