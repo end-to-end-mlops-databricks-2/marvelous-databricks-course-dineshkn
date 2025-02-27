@@ -1,3 +1,5 @@
+import logging
+
 from databricks import feature_engineering
 from databricks.feature_engineering import FeatureLookup
 from databricks.sdk import WorkspaceClient
@@ -15,6 +17,9 @@ class FeatureServing:
         """
         Initializes the Prediction Serving Manager.
         """
+        self.logger = logging.getLogger(__name__)
+        logging.basicConfig(level=logging.INFO)
+        self.feature_table_name = feature_table_name
         self.feature_table_name = feature_table_name
         self.workspace = WorkspaceClient()
         self.feature_spec_name = feature_spec_name
@@ -23,7 +28,9 @@ class FeatureServing:
         self.fe = feature_engineering.FeatureEngineeringClient()
 
     def create_online_table(self):
-        """Creates an online table based on the feature table."""
+        """
+        Creates an online table based on the feature table.
+        """
         spec = OnlineTableSpec(
             primary_key_columns=["player_name"],  # Just player_name since we aggregated
             source_table_full_name=self.feature_table_name,
@@ -32,7 +39,22 @@ class FeatureServing:
             ),
             perform_full_copy=False,
         )
-        self.workspace.online_tables.create(name=self.online_table_name, spec=spec)
+        try:
+            existing_table = self.workspace.online_tables.get(self.online_table_name)
+            if existing_table:
+                self.logger.info(f"Updating existing table: {self.online_table_name}")
+                self.workspace.online_tables.update(
+                    name=self.online_table_name, spec=spec
+                )
+
+            else:
+                self.logger.info(f"Creating new table: {self.online_table_name}")
+                self.workspace.online_tables.create(
+                    name=self.online_table_name, spec=spec
+                )
+
+        except Exception as e:
+            self.logger.error(f"Error creating online table: {e}")
 
     def create_feature_spec(self):
         """
