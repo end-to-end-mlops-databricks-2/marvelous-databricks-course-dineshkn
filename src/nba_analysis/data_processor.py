@@ -70,6 +70,28 @@ class DataProcessor:
             spark = SparkSession.builder.getOrCreate()
 
         if self.train_df is not None and self.test_df is not None:
+            # Drop "Unnamed: 0" if it exists
+            self.train_df = self.train_df.drop(columns=["Unnamed: 0"], errors="ignore")
+            self.test_df = self.test_df.drop(columns=["Unnamed: 0"], errors="ignore")
+
+            # Rename columns to remove invalid characters
+            def clean_column_names(df):
+                df.columns = [
+                    col.replace(" ", "_")
+                    .replace(";", "_")
+                    .replace("{", "_")
+                    .replace("}", "_")
+                    .replace("(", "_")
+                    .replace(")", "_")
+                    .replace("\n", "_")
+                    .replace("\t", "_")
+                    .replace("=", "_")
+                    for col in df.columns
+                ]
+                return df
+
+            self.train_df = clean_column_names(self.train_df)
+            self.test_df = clean_column_names(self.test_df)
             # Convert to Spark DataFrames with timestamp
             train_spark = spark.createDataFrame(self.train_df).withColumn(
                 "update_timestamp_utc", to_utc_timestamp(current_timestamp(), "UTC")
