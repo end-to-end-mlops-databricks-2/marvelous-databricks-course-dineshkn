@@ -1,7 +1,10 @@
 from databricks import feature_engineering
 from databricks.feature_engineering import FeatureLookup
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.catalog import OnlineTableSpec
+from databricks.sdk.service.catalog import (
+    OnlineTableSpec,
+    OnlineTableSpecTriggeredSchedulingPolicy,
+)
 from databricks.sdk.service.serving import EndpointCoreConfigInput, ServedEntityInput
 
 
@@ -24,7 +27,9 @@ class FeatureServing:
         spec = OnlineTableSpec(
             primary_key_columns=["player_name"],  # Just player_name since we aggregated
             source_table_full_name=self.feature_table_name,
-            run_triggered={"triggered": True},
+            run_triggered=OnlineTableSpecTriggeredSchedulingPolicy.from_dict(
+                {"triggered": "true"}
+            ),
             perform_full_copy=False,
         )
         self.workspace.online_tables.create(name=self.online_table_name, spec=spec)
