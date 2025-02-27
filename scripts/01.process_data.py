@@ -41,49 +41,21 @@ def main():
     logger.info("Initializing DataProcessor")
     data_processor = DataProcessor(input_df=None, config=config)
 
-    # If your DataProcessor has a preprocess method, call it
-    if hasattr(data_processor, "preprocess"):
-        logger.info("Preprocessing data")
-        data_processor.preprocess()
+    # Generate new data from the original dataset
+    synthetic_data = data_processor.make_synthetic_data(num_rows=100)
+    logger.info("Synthetic data generated")
 
-    # If your DataProcessor has a split_data method, call it
-    if hasattr(data_processor, "split_data"):
-        logger.info("Splitting data into train/test sets")
-        train_df, test_df = data_processor.split_data(test_size=0.2, random_state=42)
-        logger.info(
-            f"Train shape: {train_df.shape if train_df is not None else 'unknown'}"
-        )
-        logger.info(
-            f"Test shape: {test_df.shape if test_df is not None else 'unknown'}"
-        )
+    # Initialise new DataProcessor
+    new_processor = DataProcessor(input_df=synthetic_data, config=config)
 
-    # If your DataProcessor has a save method, call it
-    if hasattr(data_processor, "save_to_catalog"):
-        logger.info("Saving data to catalog")
-        try:
-            train_table_name = f"{config.catalog_name}.{config.schema_name}.train_set"
-            test_table_name = f"{config.catalog_name}.{config.schema_name}.test_set"
+    # Split data
+    new_processor.split_data(test_size=0.3, random_state=42)
+    logger.info("Train shape: %s", new_processor.train_df.shape)
+    logger.info("Test shape: %s", new_processor.test_df.shape)
 
-            # Check if the DataFrame is already a SparkDataFrame
-            if hasattr(train_df, "write"):
-                train_df.write.mode("overwrite").saveAsTable(train_table_name)
-            else:
-                spark.createDataFrame(train_df).write.mode("overwrite").saveAsTable(
-                    train_table_name
-                )
-
-            if hasattr(test_df, "write"):
-                test_df.write.mode("overwrite").saveAsTable(test_table_name)
-            else:
-                spark.createDataFrame(test_df).write.mode("overwrite").saveAsTable(
-                    test_table_name
-                )
-
-            logger.info("Data saved to catalog successfully")
-        except Exception as e:
-            logger.error(f"Error saving data to catalog: {str(e)}")
-
-    logger.info("✅ Data preprocessing complete")
+    # Save to catalog
+    logger.info("Saving data to catalog")
+    new_processor.save_to_catalog()
 
 
 if __name__ == "__main__":
