@@ -1,13 +1,19 @@
-input_data: '/Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv'
-local_data: 'data/raw/all_seasons.csv'
-experiment_name: "/Shared/nba-points-basic"
-experiment_name_fe: '/Shared/nba-points-fe'
-catalog_name: 'mlops_dev'
-schema_name: 'dineshka'
-parameters:
-  learning_rate: 0.01
-  n_estimators: 1000
-  max_depth: 6
+dev:
+  data: /Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv
+  catalog_name: mlops_dev
+  schema_name: dineshka
+  pipeline_id: aaaa  # Use any placeholder here
+acc:
+  data: /Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv
+  catalog_name: mlops_staging
+  schema_name: dineshka_staging
+  pipeline_id: bbbb  # Use any placeholder here
+prd:
+  data: /Volumes/mlops_dev/dineshka/nba_data/all_seasons.csv
+  catalog_name: mlops_prod
+  schema_name: dineshka
+  pipeline_id: cccc  # Use any placeholder here
+id_column: player_name
 num_features:
   - age
   - player_height
@@ -29,4 +35,34 @@ cat_features:
   - draft_round
   - draft_number
 target: pts
-experiment_name_basic: '/Shared/nba-points-basic'
+features:  # Combined list of features for convenience
+  - age
+  - player_height
+  - player_weight
+  - gp
+  - reb
+  - ast
+  - net_rating
+  - oreb_pct
+  - dreb_pct
+  - usg_pct
+  - ts_pct
+  - ast_pct
+  - team_abbreviation
+  - college
+  - country
+  - draft_year
+  - draft_round
+  - draft_number
+experiment_name: /Shared/nba-points-basic
+experiment_name_fe: /Shared/nba-points-fe
+endpoint_name: nba-points-prediction-serving
+parameters:
+  learning_rate: 0.01
+  max_depth: 6
+  random_state: 42
+  n_estimators: 100
+  subsample: 0.8
+  colsample_bytree: 0.8
+packages:
+  - nba_analysis-0.0.1-py3-none-any.whl

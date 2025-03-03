@@ -18,7 +18,9 @@ class ModelServing:
         latest_version = client.get_model_version_by_alias(
             self.model_name, alias="latest-model"
         ).version
-        print(f"Latest model version: {latest_version}")
+
+        latest_version = int(latest_version)
+        print(f"Latest model version: {latest_version} (Type: {type(latest_version)})")
         return latest_version
 
     def deploy_or_update_serving_endpoint(
@@ -44,6 +46,8 @@ class ModelServing:
             entity_version = self.get_latest_model_version()
         else:
             entity_version = version
+
+        print(f"Entity version: {entity_version}, Type: {type(entity_version)}")
 
         served_entities = [
             ServedEntityInput(
