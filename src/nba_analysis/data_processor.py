@@ -126,7 +126,7 @@ class DataProcessor:
         return self
 
 
-def generate_synthetic_data(self, drift=False, num_rows=100):
+def generate_synthetic_data(data, drift=False, num_rows=100):
     """
     Generate synthetic NBA player data, optionally with drift.
 
@@ -140,7 +140,7 @@ def generate_synthetic_data(self, drift=False, num_rows=100):
     synthetic_data = pd.DataFrame()
 
     # For each column in the original dataframe
-    for column in self.data.columns:
+    for column in data.columns:
         if column == "player_name":
             # Generate random player names
             first_names = [
@@ -169,15 +169,15 @@ def generate_synthetic_data(self, drift=False, num_rows=100):
                 for _ in range(num_rows)
             ]
 
-        elif pd.api.types.is_numeric_dtype(self.data[column]):
+        elif pd.api.types.is_numeric_dtype(data[column]):
             # For numeric columns
             if column in ["age", "gp"]:  # Handle specific numeric columns
                 synthetic_data[column] = np.random.randint(
-                    self.data[column].min(), self.data[column].max() + 1, num_rows
+                    data[column].min(), data[column].max() + 1, num_rows
                 )
             else:
                 synthetic_data[column] = np.random.normal(
-                    self.data[column].mean(), self.data[column].std(), num_rows
+                    data[column].mean(), data[column].std(), num_rows
                 )
 
                 # Ensure points are non-negative
@@ -185,21 +185,21 @@ def generate_synthetic_data(self, drift=False, num_rows=100):
                     synthetic_data[column] = np.maximum(0, synthetic_data[column])
 
         elif pd.api.types.is_categorical_dtype(
-            self.data[column]
-        ) or pd.api.types.is_object_dtype(self.data[column]):
+            data[column]
+        ) or pd.api.types.is_object_dtype(data[column]):
             # For categorical columns
             synthetic_data[column] = np.random.choice(
-                self.data[column].unique(),
+                data[column].unique(),
                 num_rows,
-                p=self.data[column].value_counts(normalize=True),
+                p=data[column].value_counts(normalize=True),
             )
         else:
             # For other types
-            synthetic_data[column] = np.random.choice(self.data[column], num_rows)
+            synthetic_data[column] = np.random.choice(data[column], num_rows)
 
     # Convert relevant columns to integers
     int_columns = {"gp", "age"}
-    for col in int_columns.intersection(self.data.columns):
+    for col in int_columns.intersection(data.columns):
         synthetic_data[col] = synthetic_data[col].astype(np.int32)
 
     # Apply drift if requested
