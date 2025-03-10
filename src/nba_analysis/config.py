@@ -39,6 +39,10 @@ class Config(BaseModel):
         return cls(**config_dict)
 
 
+# For backward compatibility, create an alias for Config
+ProjectConfig = Config
+
+
 class Tags(BaseModel):
     git_sha: str
     branch: str
