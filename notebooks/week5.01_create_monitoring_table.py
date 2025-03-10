@@ -3,11 +3,21 @@
 # MAGIC ## NBA Points Prediction - Model Monitoring Setup
 
 # COMMAND ----------
+import datetime
+import itertools
+import time
+
 import pandas as pd
+import requests
+from databricks.sdk import WorkspaceClient
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import LabelEncoder
 
 from src.nba_analysis.config import Config
+from src.nba_analysis.data_processor import generate_synthetic_data
+from src.nba_analysis.monitoring import create_or_refresh_monitoring
 
 spark = SparkSession.builder.getOrCreate()
 
@@ -27,8 +37,6 @@ test_set = spark.table(
 # MAGIC ## Feature Importance Analysis
 
 # COMMAND ----------
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import LabelEncoder
 
 
 # Encode categorical variables
@@ -64,7 +72,6 @@ print(feature_importances.head(5))
 # MAGIC ## Generate Synthetic Data with Drift
 
 # COMMAND ----------
-from src.nba_analysis.data_processor import generate_synthetic_data
 
 # Generate data with drift
 inference_data_skewed = generate_synthetic_data(train_set, drift=True, num_rows=200)
@@ -88,13 +95,6 @@ inference_data_skewed_spark.write.mode("overwrite").saveAsTable(
 # MAGIC ## Send Test Traffic to Model Endpoint
 
 # COMMAND ----------
-import datetime
-import itertools
-import time
-
-import requests
-from databricks.sdk import WorkspaceClient
-
 workspace = WorkspaceClient()
 token = (
     dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
@@ -166,9 +166,7 @@ for index, record in enumerate(itertools.cycle(skewed_records)):
 # MAGIC ## Create and Refresh Monitoring Tables
 
 # COMMAND ----------
-from databricks.sdk import WorkspaceClient
 
-from nba_analysis.monitoring import create_or_refresh_monitoring
 
 workspace = WorkspaceClient()
 
