@@ -41,7 +41,7 @@ def main():
     data_processor = DataProcessor(input_df=None, config=config)
 
     # Generate new data from the original dataset
-    synthetic_data = data_processor.make_synthetic_data(num_rows=100)
+    synthetic_data = data_processor.generate_synthetic_data(num_rows=100)
     logger.info("Synthetic data generated")
 
     # Initialise new DataProcessor

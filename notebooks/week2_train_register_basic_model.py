@@ -24,7 +24,7 @@ mlflow.set_registry_uri("databricks-uc")
 mlflow.set_experiment("/Shared/nba-points-basic")
 
 # Initialize configs and spark
-config = ProjectConfig.from_yaml("../project_config.yml")
+config = ProjectConfig.from_yaml("../project_config.yml", env="prd")
 spark = SparkSession.builder.getOrCreate()
 tags = {"git_sha": "your-git-sha", "branch": "week2"}
 

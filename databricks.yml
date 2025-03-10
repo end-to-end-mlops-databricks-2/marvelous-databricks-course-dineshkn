@@ -5,6 +5,9 @@
 bundle:
   name: nba-points-prediction
 
+include:
+  - bundle_monitoring.yml
+  
 artifacts:
   default:
     type: whl
