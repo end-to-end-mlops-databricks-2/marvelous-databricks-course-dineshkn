@@ -10,6 +10,7 @@ import time
 import pandas as pd
 import requests
 from databricks.sdk import WorkspaceClient
+from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
 from sklearn.ensemble import RandomForestRegressor
@@ -20,6 +21,14 @@ from src.nba_analysis.data_processor import generate_synthetic_data
 from src.nba_analysis.monitoring import create_or_refresh_monitoring
 
 spark = SparkSession.builder.getOrCreate()
+# Initialize dbutils
+dbutils = DBUtils(spark)
+
+token = (
+    dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
+)
+host = spark.conf.get("spark.databricks.workspaceUrl")
+
 
 # Load configuration
 config = Config.from_yaml(config_path="project_config.yml", env="dev")
