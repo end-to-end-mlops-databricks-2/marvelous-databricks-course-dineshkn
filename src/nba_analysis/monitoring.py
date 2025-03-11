@@ -36,7 +36,10 @@ def create_or_refresh_monitoring(config, spark, workspace):
 
     # Check if inference logs table exists
     try:
-        table_name = f"{config.catalog_name}.{config.schema_name}.nba-points-model-serving_payload"
+        table_name = (
+            f"{config.catalog_name}.{config.schema_name}."
+            "nba-points-model-serving_payload"
+        )
         inf_table = spark.sql(f"SELECT * FROM `{table_name}`")
         logger.info(f"Found model serving payload table: {table_name}")
     except Exception as e:
